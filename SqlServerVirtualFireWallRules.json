@@ -1,0 +1,36 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "SqlServerName": {
+            "type": "string",
+            "metadata": {
+                "defaultValue": "[uniqueString('sql', resourceGroup().id)]",
+                "description": "The name of the SQL logical server."
+            }
+        },
+        "firewallRules": {
+             "type" : "object",
+            "defaultvalue" : { "name": "None" , "ipRules" : []  },      
+            "metadata" : {
+                "description" : ""
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name" : "[concat(parameters('SqlServerName'),'/',parameters('firewallRules').firewallRules[copyIndex()].name)]",                        
+            "properties": {
+                "startIpAddress": "[parameters('firewallRules').firewallRules[copyIndex()].startip]",
+                "endIpAddress": "[parameters('firewallRules').firewallRules[copyIndex()].endip]"
+                },
+            "copy" : {
+                 "name" : "datasetcopy",
+                "count" : "[length(parameters('firewallRules').firewallRules)]"
+                }                
+        }
+        
+    ]
+}

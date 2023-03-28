@@ -1,0 +1,36 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "SqlServerName": {
+            "type": "string",
+            "metadata": {
+                "defaultValue": "[uniqueString('sql', resourceGroup().id)]",
+                "description": "The name of the SQL logical server."
+            }
+        },
+        "virtualNetworkRules": {
+             "type" : "object",
+            "defaultvalue" : { "bypass": "None" , "defaultAction": "Allow","ipRules" : [],"virtualNetworkRules" : []  },      
+            "metadata" : {
+                "description" : ""
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Sql/servers/virtualNetworkRules",
+            "apiVersion": "2015-05-01-preview",
+            "name" : "[concat(parameters('SqlServerName'),'/',parameters('VirtualNetworkRules').virtualNetworkRules[copyIndex()].vnetRuleName)]",                        
+            "properties": {
+                "virtualNetworkSubnetId": "[resourceId(subscription().subscriptionId,parameters('VirtualNetworkRules').virtualNetworkRules[copyIndex()].vnetResourceGroup,'Microsoft.Network/virtualNetworks/subnets', parameters('VirtualNetworkRules').virtualNetworkRules[copyIndex()].vnetName, parameters('VirtualNetworkRules').virtualNetworkRules[copyIndex()].subnetName)]",
+                "ignoreMissingVnetServiceEndpoint": true
+                },
+            "copy" : {
+                 "name" : "datasetcopy",
+                "count" : "[length(parameters('VirtualNetworkRules').virtualNetworkRules)]"
+                }                   
+        }
+        
+    ]
+}

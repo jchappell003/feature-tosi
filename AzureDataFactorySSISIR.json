@@ -1,0 +1,92 @@
+{
+    "contentVersion": "1.0.0.0",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "parameters": {
+            "DataFactoryName": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the Data Factory."
+                }
+            },
+            "IntegrationRunTimeName": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the Data Factory."
+                }
+            },
+            "BlobStorageName": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the Data Factory."
+                }
+            },
+            "SelfHostedIntegrationRunTimeName": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the Data Factory."
+                }
+            },
+            "SqlServerName": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the SQL logical server."
+                }
+            },
+            "CatalogPricingTier": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the SQL logical server."
+                
+                },
+                "allowedValues" : ["Basic","PremiumRS"],
+                "defaultValue" : "Basic"
+            },
+            "VirtualNetworkResourceGroup": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the SQL logical server."
+                }
+            },
+            "VirtualNetwork": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the SQL logical server."
+                }
+            },
+            "Subnet": {
+                "type": "string",
+                "metadata": {
+                    "description": "The name of the SQL logical server."
+                }
+            }
+        },
+    "variables": {},
+    "resources":  [{
+            "type": "Microsoft.DataFactory/factories/integrationruntimes",
+            "name": "[concat(parameters('DataFactoryName'),'/',parameters('IntegrationRunTimeName'))]",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "type": "Managed",
+                "typeProperties": {
+                    "computeProperties": {
+                        "location": "East US",
+                        "nodeSize": "Standard_D8_v3",
+                        "numberOfNodes": 1,
+                        "maxParallelExecutionsPerNode": 8,
+                        "vNetProperties" : {  "subnet" : "[parameters('Subnet')]"
+                                            , "vNetId" : "[resourceId(subscription().subscriptionId,parameters('VirtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks', parameters('VirtualNetwork'))]"},
+                        "dataFlowProperties" : {}
+                    },
+                    "ssisProperties": {
+                       "catalogInfo": {
+                            "catalogServerEndpoint": "[concat(parameters('SqlServerName'),'.database.windows.net')]",
+                            "catalogPricingTier" : "[parameters('CatalogPricingTier')]"                                                              
+                        },
+                        "additionalProperties" : {}
+                    }
+                    
+                }
+            }
+    }
+    ]
+}
